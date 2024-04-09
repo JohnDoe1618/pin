@@ -1,5 +1,5 @@
 <template>
-    <v-main class="d-flex align-center justify-center" style="min-height: 300px;">
+    <v-main class="main d-flex align-center justify-center">
         <router-view />
     </v-main>
 </template>
@@ -8,4 +8,5 @@
 
 </script>
 
-<style scoped></style>
+<style scoped>
+</style>

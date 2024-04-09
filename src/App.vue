@@ -23,9 +23,10 @@ import mainComp from '@/components/main/mainComp.vue';
 :root {
     --primary-bg: black;
     --primary-fg: white;
+    --font: "Work Sans", sans-serif;
 }
 
 #app {
-    font-family: "Work Sans", sans-serif;
+    font-family: var(--font);
 }
 </style>
