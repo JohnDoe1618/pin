@@ -1,13 +1,22 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import RecordView from '@/views/RecordView'
+import PinsView from '@/views/PinsView';
+import SettingView from '@/views/SettingView'
 
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: RecordView,
+    redirect: {name: 'pins'},
   },
-
+  {
+    path: '/pins',
+    name: 'pins',
+    component: PinsView,
+  },
+  {
+    path: '/settings',
+    name: 'settings',
+    component: SettingView,
+  },
 ]
 
 const router = createRouter({
