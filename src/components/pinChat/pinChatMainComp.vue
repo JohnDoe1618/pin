@@ -1,5 +1,6 @@
 <template>
     <div class="pin-chat-main">
+
         <!-- Шапка -->
         <div class="pin-chat-main__header">
             <h4 class="header-title">{{ pinData.title }}</h4>
@@ -7,6 +8,14 @@
 
         <!-- Блок отрисовки сообщений -->
         <div class="pin-chat-main__body" ref="pinChatMainBody">
+            <!-- Уведомление "Еще нет Сообщений" -->
+            <div 
+            class="if-not-messages"
+            v-show="!mainStore.messages.length"
+            >
+                <h1 class="if-not-message__title">Not Message</h1>
+            </div>
+
             <div class="message-wrapper"></div>
             <pinChatItemComp 
             v-for="message in mainStore.messages" 
@@ -51,6 +60,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import { createNewMessageDB, getMessagesByPinIdDB } from '../../api/messagesApi';
 import useMainStore from '@/store/mainStore';
 import pinChatItemComp from './pinChatItemComp.vue';
 
@@ -106,10 +116,12 @@ async function handlerCreateMessage() {
         if(message.value.trim().length) {
             const newMessage = await new Promise((resolve) => {
                 setTimeout(() => {
-                    resolve({ 
+                    const creationMessage = createNewMessageDB({ 
                         id: Date.now(), 
-                        textContent: message.value.trim(),
-                    })
+                        textContent: message.value.trim(), 
+                        pinId: pinData.value.id,
+                    });
+                    resolve(creationMessage);
                 }, 800);
             });
             mainStore.messages.push(newMessage);
@@ -124,7 +136,10 @@ async function handlerCreateMessage() {
     }
 }
 
-onMounted(() => {
+onMounted(async() => {
+
+
+    // Обработчик нажатия Enter и Shift + Enter в поле ввода сообщений
     messageInput.value.addEventListener('keydown', function(event) {
         if (event.key === 'Enter' && event.shiftKey) {
             event.preventDefault();
@@ -139,6 +154,7 @@ onMounted(() => {
         throw new Error(`components/pinChat/pinChatMainComp: onMounted[updateScroll] => ${err}`);
 
     }
+    // Получение данных текущего пина
     try {
         mainStore.pins.forEach((pin) => {
             if (+route.params.id === pin.id) {
@@ -148,17 +164,25 @@ onMounted(() => {
                     description: pin.description,
                 }
             }
-        })
+        });
     } catch (err) {
         console.error(err);
         throw new Error(`components/pinChat/pinChatMainComp: onMounted[parsing pin data] => ${err}`);
+    }
+    // Получение сообщений текущего пина
+    try {
+        mainStore.messages = await getMessagesByPinIdDB(pinData.value.id);
+    } catch (err) {
+        throw new Error(`components/pinChat/pinChatMainComp: onMounted[fetch messages] => ${err}`);
     }
 })
 
 </script>
 
 <style scoped>
+
 .pin-chat-main {
+    position: relative;
     border: 1px solid black;
     position: relative;
     height: 92vh;
@@ -169,6 +193,7 @@ onMounted(() => {
     align-items: center;
     justify-content: flex-start;
     font-family: var(--font);
+    z-index: 10;
 }
 
 .pin-chat-main__header {
@@ -182,11 +207,25 @@ onMounted(() => {
 }
 
 .pin-chat-main__body {
+    position: relative;
     width: 95%;
     height: 100%;
     overflow: auto;
     padding: 1rem 0;
     border: 1px solid black;
+}
+.if-not-messages {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 90%;
+    z-index: 100;
+}
+.if-not-message__title {
+    font-family: monospace;
+    font-weight: 900;
 }
 .message-wrapper {
     width: 100%;
