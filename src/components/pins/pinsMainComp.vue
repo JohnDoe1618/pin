@@ -1,0 +1,95 @@
+<template>
+    <div class="pins-main">
+        <!-- Если нет пинов -->
+        <div v-show="!mainStore.pins.length" class="pins-main__header">
+            <h1 class="header-title">No Pins</h1>
+        </div>
+
+        <v-dialog
+        v-model="isShowCreationForm"
+        >
+            <creationPinFormComp />
+        </v-dialog>
+
+        <!-- Отрисовка пинов -->
+        <pinItemComp 
+        v-for="item in mainStore.pins"
+        @click="router.push({ name: 'pins-chat', params: { id: item?.id } })"
+        :item-data="item"
+        :key="item" 
+        />
+
+        <!-- + -->
+        <v-btn 
+        class="btn-create" 
+        color="var(--primary-bg)" 
+        icon="mdi-plus"
+        @click="openCreationForm"
+        ></v-btn>
+    </div>
+</template>
+
+<script setup>
+import pinItemComp from './pinItemComp.vue';
+import creationPinFormComp from './creationPinFormComp.vue';
+import useMainStore from '@/store/mainStore';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+const mainStore = useMainStore();
+
+// =======================================  DATA  =================================
+// const isLoadingData = ref(false);
+const isShowCreationForm = ref(false);
+
+
+// =======================================  METHODS  =================================
+// Обработчик открытия формы для создания нового пина
+function openCreationForm() {
+    try {
+        isShowCreationForm.value = true;
+    } catch (err) {
+        throw new Error(`components/pins/pinsMainComp.vue: openCreationForm => ${err}`);
+    }
+}
+
+</script>
+
+<style scoped>
+.pins-main {
+    position: relative;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    font-family: var(--font);
+    padding: 2rem;
+}
+
+.pins-main__header {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    left: 0;
+    height: 100%;
+    align-self: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+.header-title {
+    font-family: var(--font);
+    font-weight: 400;
+}
+
+.btn-create {
+    color: rgb(69, 172, 69);
+    position: absolute;
+    left: 3%;
+    bottom: 0%;
+}
+</style>

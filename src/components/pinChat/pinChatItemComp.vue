@@ -1,0 +1,53 @@
+<template>
+    <div 
+    :id="`message-` + props.messageData.id"
+    class="pin-chat-item__container"
+    >
+        <div class="pin-chat-item">
+            <p class="pin-chat-item__text">
+                {{ props.messageData?.textContent }}
+            </p>
+        </div>
+    </div>
+</template>
+
+<script setup>
+import { defineProps } from 'vue';
+const props = defineProps({
+    messageData: {
+        type: Object,
+        required: true,
+    }
+});
+
+</script>
+
+<style scoped>
+.pin-chat-item__container {
+    width: 100%;
+    padding: 0.2rem 1rem;
+}
+
+.pin-chat-item__container:hover {
+    background-color: var(--message-hover);
+    cursor: pointer;
+}
+
+.pin-chat-item {
+    color: var(--message-fg);
+    background-color: var(--message-bg);
+    width: max-content;
+    height: max-content;
+    padding: 0.6rem 1rem;
+    max-width: 60%;
+    min-width: 20px;
+}
+
+.pin-chat-item__text {
+    width: 100%;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    margin: auto;
+    font-size: var(--font-size);
+}
+</style>
