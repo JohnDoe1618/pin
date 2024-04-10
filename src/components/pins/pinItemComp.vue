@@ -39,7 +39,7 @@ const props = defineProps({
     background-color: rgba(126, 125, 125, 0.2);
 }
 .pin-item__title {
-    color: rgb(105, 105, 105);
+    color: var(--pin-title-fg);
 }
 .pin-item__description {
     margin-left: 0.5rem;

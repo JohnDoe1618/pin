@@ -21,9 +21,18 @@ import mainComp from '@/components/main/mainComp.vue';
 }
 
 :root {
+    /* COLOR */
     --primary-bg: black;
     --primary-fg: white;
     --font: "Work Sans", sans-serif;
+    /* Pin Item */
+    --pin-title-fg: rgb(105, 105, 105);
+    --pin-title-bg: black;
+    --pin-border: 1px dashed rgba(128, 128, 128, 0.724);
+
+    /* Pin Chat */
+    --pin-chat-title-fg: white;
+    --pin-chat-title-bg: black;
 }
 
 #app {

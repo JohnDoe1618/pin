@@ -1,7 +1,6 @@
 <template>
     <v-app-bar
     height="50"
-    tile="Pin"
     >
         <template v-slot:prepend>
             <v-icon icon="mdi-beer"></v-icon>

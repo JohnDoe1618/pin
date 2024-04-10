@@ -7,19 +7,27 @@
 
         <!-- Отрисовка пинов -->
         <pinItemComp 
-        v-for="item in pins" 
+        v-for="item in pins"
+        @click="router.push({ name: 'pins-chat', params: { id: item?.id } })"
         :item-data="item"
         :key="item" 
         />
 
         <!-- + -->
-        <v-btn class="btn-create" color="var(--primary-bg)" icon="mdi-plus"></v-btn>
+        <v-btn 
+        class="btn-create" 
+        color="var(--primary-bg)" 
+        icon="mdi-plus"
+        ></v-btn>
     </div>
 </template>
 
 <script setup>
 import pinItemComp from './pinItemComp.vue';
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 // =======================================  DATA  =================================
 const pins = ref([
