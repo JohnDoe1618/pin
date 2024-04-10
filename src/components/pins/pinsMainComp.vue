@@ -1,13 +1,19 @@
 <template>
     <div class="pins-main">
         <!-- Если нет пинов -->
-        <div v-show="!pins.length" class="pins-main__header">
+        <div v-show="!mainStore.pins.length" class="pins-main__header">
             <h1 class="header-title">No Pins</h1>
         </div>
 
+        <v-dialog
+        v-model="isShowCreationForm"
+        >
+            <creationPinFormComp />
+        </v-dialog>
+
         <!-- Отрисовка пинов -->
         <pinItemComp 
-        v-for="item in pins"
+        v-for="item in mainStore.pins"
         @click="router.push({ name: 'pins-chat', params: { id: item?.id } })"
         :item-data="item"
         :key="item" 
@@ -18,26 +24,35 @@
         class="btn-create" 
         color="var(--primary-bg)" 
         icon="mdi-plus"
+        @click="openCreationForm"
         ></v-btn>
     </div>
 </template>
 
 <script setup>
 import pinItemComp from './pinItemComp.vue';
+import creationPinFormComp from './creationPinFormComp.vue';
+import useMainStore from '@/store/mainStore';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+const mainStore = useMainStore();
 
 // =======================================  DATA  =================================
-const pins = ref([
-    {id: 1, title: 'Учетные Данные', description: "Тут хранятся все учетные данные"},
-    {id: 2, title: 'О Электросхемах', description: "Обучение по Электросхемам"},
-    {id: 3, title: 'Сети', description: "Общая инфа о сетях"},
-]);
+// const isLoadingData = ref(false);
+const isShowCreationForm = ref(false);
 
 
 // =======================================  METHODS  =================================
+// Обработчик открытия формы для создания нового пина
+function openCreationForm() {
+    try {
+        isShowCreationForm.value = true;
+    } catch (err) {
+        throw new Error(`components/pins/pinsMainComp.vue: openCreationForm => ${err}`);
+    }
+}
 
 </script>
 

@@ -6,13 +6,17 @@
         </div>
 
         <!-- Блок отрисовки сообщений -->
-        <div class="pin-chat-main__body">
+        <div class="pin-chat-main__body" ref="pinChatMainBody">
             <div class="message-wrapper"></div>
-            <pinChatItemComp v-for="(item, index) in 1" :key="index" />
+            <pinChatItemComp 
+            v-for="message in mainStore.messages" 
+            :key="message.id" 
+            :message-data="message"
+            />
         </div>
 
         <!-- Блок периферии -->
-        <form class="pin-chat-main__actions">
+        <form class="pin-chat-main__actions" @submit.prevent>
 
             <!-- Меню опций панели ввода -->
             <div class="actions--options">
@@ -22,15 +26,23 @@
             <!-- Поле ввода сообщений -->
             <div class="actions--input">
                 <textarea 
-                @input="autoExpand" 
                 class="actions-form__message-input"
+                @input="autoExpand"
+                @keyup.shift.enter="handlerCreateMessage"
+                ref="messageInput"
+                placeholder="Enter your message"
                 v-model="message"
                 ></textarea>
             </div>
 
             <!-- Кнопки для управления панелью ввода -->
             <div class="actions--btns">
-                <v-btn class="btn-send" icon="mdi-send-variant"></v-btn>
+                <v-btn 
+                class="btn-send" 
+                icon="mdi-send-variant"
+                @click="handlerCreateMessage"
+                :loading="isLoadingCreationMessage"
+                ></v-btn>
             </div>
         </form>
     </div>
@@ -52,19 +64,81 @@ const pinData = ref({
     title: null,
     description: null,
 });
+const isLoadingCreationMessage = ref(false);
+const maxHeightInput = ref('30px');
+// DOM ELEMENTS
+const pinChatMainBody = ref(null);
+const messageInput = ref(null);
+
 
 // ====================================  METHODS  ====================================
 function autoExpand(event) {
     // Сбросить высоту перед получением новой
     if(event.target.value === '') {
-        return event.target.style.height = '30px';
+        return event.target.style.height = maxHeightInput.value;
     }
-    event.target.style.height = '30px';
+    event.target.style.height = maxHeightInput.value;
     // Установить новую высоту
     event.target.style.height = (event.target.scrollHeight) + 'px';
 }
 
+// Обновляет состояние прокрутки окна сообщений
+function updateScroll() {
+    try {
+        if(pinChatMainBody.value) {
+            const beforeScroll = pinChatMainBody.value.scrollHeight;
+            setTimeout(() => {
+                pinChatMainBody.value.scroll({
+                    top: beforeScroll,
+                });
+            }, 0);
+        }
+    } catch (err) {
+        throw new Error(`components/pinChat/pinChatMainComp: updateScroll => ${err}`);
+    }
+}
+
+// Обработчик создания сообщения
+async function handlerCreateMessage() {
+    try {
+        isLoadingCreationMessage.value = true
+        // Иммитация отправки запроса
+        if(message.value.trim().length) {
+            const newMessage = await new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve({ 
+                        id: Date.now(), 
+                        textContent: message.value.trim(),
+                    })
+                }, 800);
+            });
+            mainStore.messages.push(newMessage);
+            message.value = '';
+            updateScroll();
+            messageInput.value.style.height = maxHeightInput.value;
+        }
+    } catch (err) {
+        throw new Error(`components/pinChat/pinChatMainComp: handlerCreateMessage => ${err}`);
+    } finally {
+        isLoadingCreationMessage.value = false;
+    }
+}
+
 onMounted(() => {
+    messageInput.value.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' && event.shiftKey) {
+            event.preventDefault();
+        }
+        if(event.key === 'Enter') {
+            message.value;
+        }
+    });
+    try {
+        updateScroll()
+    } catch (err) {
+        throw new Error(`components/pinChat/pinChatMainComp: onMounted[updateScroll] => ${err}`);
+
+    }
     try {
         mainStore.pins.forEach((pin) => {
             if (+route.params.id === pin.id) {
@@ -75,10 +149,9 @@ onMounted(() => {
                 }
             }
         })
-
     } catch (err) {
         console.error(err);
-        throw new Error(`components/pinChat/pinChatMainComp: onMounted => ${err}`);
+        throw new Error(`components/pinChat/pinChatMainComp: onMounted[parsing pin data] => ${err}`);
     }
 })
 

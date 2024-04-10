@@ -45,7 +45,8 @@ import mainComp from '@/components/main/mainComp.vue';
     /* Message */
     --message-fg: white;
     --message-bg: black;
-    --message-hover: rgba(128, 128, 128, 0.176);
+    --message-hover: rgba(128, 128, 128, 0.1);
+    --font-size: 0.8rem;
 }
 
 #app {
@@ -60,11 +61,9 @@ import mainComp from '@/components/main/mainComp.vue';
 ::-webkit-scrollbar-thumb {
     background-color: var(--scroll-bg);
     border-radius: 20px;
-    /* цвет полосы прокрутки */
 }
 
 ::-webkit-scrollbar-track {
     background-color: var(--scroll-fg);
-    /* цвет фона */
 }
 </style>
