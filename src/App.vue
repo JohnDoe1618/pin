@@ -33,9 +33,38 @@ import mainComp from '@/components/main/mainComp.vue';
     /* Pin Chat */
     --pin-chat-title-fg: white;
     --pin-chat-title-bg: black;
+
+    /* Pin Chat input */
+    --chat-input-btn-bg: black;
+    --chat-input-btn-fg: white;
+
+    /* Scroll */
+    --scroll-bg: black;
+    --scroll-fg: white;
+
+    /* Message */
+    --message-fg: white;
+    --message-bg: black;
+    --message-hover: rgba(128, 128, 128, 0.176);
 }
 
 #app {
     font-family: var(--font);
+}
+/* По умолчанию скроллбар в приложении отключен */
+::-webkit-scrollbar {
+    width: 6px;
+    /* ширина скроллбара */
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--scroll-bg);
+    border-radius: 20px;
+    /* цвет полосы прокрутки */
+}
+
+::-webkit-scrollbar-track {
+    background-color: var(--scroll-fg);
+    /* цвет фона */
 }
 </style>
