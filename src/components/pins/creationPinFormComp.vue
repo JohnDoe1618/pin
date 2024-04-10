@@ -51,6 +51,7 @@
 
 <script setup>
 import useMainStore from '@/store/mainStore';
+import { createNewPinDB } from '../../api/pinsApi';
 import { ref, defineEmits, onMounted } from 'vue';
 
 const mainStore = useMainStore();
@@ -76,7 +77,8 @@ async function confirmToCreationPin() {
         if(title.value && description.value) {
             const newPin = await new Promise((resolve) => {
                 setTimeout(() => {
-                    resolve({ id: Date.now(), title: title.value, description: description.value })
+                    const creationPin = createNewPinDB({ id: Date.now(), title: title.value, description: description.value });
+                    resolve(creationPin);
                 }, 500);
             });
             mainStore.pins.push(newPin);

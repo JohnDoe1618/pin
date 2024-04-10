@@ -109,7 +109,7 @@ function handlerErrorMsg(content) {
 }
 
 // =======================================  LIFECYCLE HOOKS  =================================
-onMounted(() => {
+onMounted(async() => {
     try {
         document.addEventListener('keydown', (event) => {
             // Открыть окно создание нового пина по нажатию на C
@@ -118,7 +118,7 @@ onMounted(() => {
             }
         })
     } catch (err) {
-        throw new Error(`components/pins/pinsMainComp.vue: onMounted => ${err}`);
+        throw new Error(`components/pins/pinsMainComp.vue: onMounted[Event > keydown] => ${err}`);
     }
 })
 
