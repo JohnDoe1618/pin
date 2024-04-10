@@ -1,11 +1,16 @@
 <template>
     <div class="pins-main">
+        <!-- Если нет пинов -->
         <div v-show="!pins.length" class="pins-main__header">
             <h1 class="header-title">No Pins</h1>
         </div>
-        <div class="pin-container" v-for="item in pins" :key="item">
-            Item number #{{ item }}
-        </div>
+
+        <!-- Отрисовка пинов -->
+        <pinItemComp 
+        v-for="item in pins" 
+        :item-data="item"
+        :key="item" 
+        />
 
         <!-- + -->
         <v-btn class="btn-create" color="var(--primary-bg)" icon="mdi-plus"></v-btn>
@@ -13,13 +18,14 @@
 </template>
 
 <script setup>
+import pinItemComp from './pinItemComp.vue';
 import { ref } from 'vue';
 
 // =======================================  DATA  =================================
 const pins = ref([
-    // 'hello',
-    // 'example1',
-    // 'example2'
+    {id: 1, title: 'Учетные Данные', description: "Тут хранятся все учетные данные"},
+    {id: 2, title: 'О Электросхемах', description: "Обучение по Электросхемам"},
+    {id: 3, title: 'Сети', description: "Общая инфа о сетях"},
 ]);
 
 
@@ -36,6 +42,7 @@ const pins = ref([
     align-items: center;
     justify-content: flex-start;
     font-family: var(--font);
+    padding: 2rem;
 }
 
 .pins-main__header {
@@ -49,18 +56,13 @@ const pins = ref([
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid black;
 
 }
 .header-title {
     font-family: var(--font);
     font-weight: 400;
 }
-.pin-container {
-    width: 100%;
-    height: 100px;
-    border: 1px solid black;
-}
+
 .btn-create {
     color: rgb(69, 172, 69);
     position: absolute;

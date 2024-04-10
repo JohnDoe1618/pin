@@ -9,6 +9,7 @@
 </script>
 
 <style scoped>
-
-
+.setting-view-main {
+    width: 100%;
+}
 </style>
