@@ -1,5 +1,16 @@
 <template>
     <div class="pins-main">
+
+        <!-- Уведомление ошибки -->
+        <error-note-comp 
+        :error-msg="errorMsg"
+        ></error-note-comp>
+
+        <!-- Уведомление успеха -->
+        <success-note-comp
+        @complete="handlerSuccessAnimation"
+        ></success-note-comp>
+
         <!-- Если нет пинов -->
         <div v-show="!mainStore.pins.length" class="pins-main__header">
             <h1 class="header-title">No Pins</h1>
@@ -8,7 +19,11 @@
         <v-dialog
         v-model="isShowCreationForm"
         >
-            <creationPinFormComp />
+            <creationPinFormComp 
+            @error="(content) => handlerErrorMsg(content)"
+            @success="handlerSuccessMsg"
+            @close="handlerCloseForm"
+            />
         </v-dialog>
 
         <!-- Отрисовка пинов -->
@@ -33,7 +48,7 @@
 import pinItemComp from './pinItemComp.vue';
 import creationPinFormComp from './creationPinFormComp.vue';
 import useMainStore from '@/store/mainStore';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -42,6 +57,7 @@ const mainStore = useMainStore();
 // =======================================  DATA  =================================
 // const isLoadingData = ref(false);
 const isShowCreationForm = ref(false);
+const errorMsg = ref('');
 
 
 // =======================================  METHODS  =================================
@@ -53,6 +69,58 @@ function openCreationForm() {
         throw new Error(`components/pins/pinsMainComp.vue: openCreationForm => ${err}`);
     }
 }
+
+// Выполняется когда завершается анимация уведомления успеха 
+function handlerSuccessAnimation() {
+    try {
+        if(isShowCreationForm.value === true) {
+            // isShowCreationForm.value = false;
+        }
+    } catch (err) {
+        throw new Error(`components/pins/pinsMainComp.vue: handlerSuccessAnimation => ${err}`);
+    }
+}
+
+function handlerCloseForm() {
+    try {
+        isShowCreationForm.value = false;
+    } catch (err) {
+        throw new Error(`components/pins/pinsMainComp.vue: handlerCloseForm => ${err}`);
+    }
+}
+
+// Обработчик появления уведомления об успехе
+function handlerSuccessMsg() {
+    try {
+        mainStore.activateSuccessNote(1500);
+    } catch (err) {
+        throw new Error(`components/pins/pinsMainComp.vue: handlerSuccessMsg => ${err}`);
+    }
+}
+
+// Обработчик появления уведомления об ошибке
+function handlerErrorMsg(content) {
+    try {
+        mainStore.activateErrorNote(2500);
+        errorMsg.value = content;
+    } catch (err) {
+        throw new Error(`components/pins/pinsMainComp.vue: handlerErrorMsg => ${err}`);
+    }
+}
+
+// =======================================  LIFECYCLE HOOKS  =================================
+onMounted(() => {
+    try {
+        document.addEventListener('keydown', (event) => {
+            // Открыть окно создание нового пина по нажатию на C
+            if(event.key.toLocaleLowerCase() === 'c' || event.key.toLocaleLowerCase() === 'с') {
+                isShowCreationForm.value = true;
+            }
+        })
+    } catch (err) {
+        throw new Error(`components/pins/pinsMainComp.vue: onMounted => ${err}`);
+    }
+})
 
 </script>
 

@@ -47,6 +47,12 @@ import mainComp from '@/components/main/mainComp.vue';
     --message-bg: black;
     --message-hover: rgba(128, 128, 128, 0.1);
     --font-size: 0.8rem;
+
+    /* Notifications */
+    --succ-bg: black;
+    --succ-fg: greenyellow;
+    --err-bg: black;
+    --err-fg: rgb(245, 87, 87);
 }
 
 #app {

@@ -4,6 +4,9 @@ import './registerServiceWorker'
 import router from './router'
 import { createPinia } from 'pinia';
 
+// notifications
+import notifications from './components/notifications';
+
 const pinia = createPinia();
 
 // Vuetify
@@ -40,6 +43,11 @@ const vuetify = createVuetify({
 })
 
 const app = createApp(App);
+
+// Регистрация уведомлений
+notifications.forEach((note) => {
+    app.component(note.compName, note);
+});
 
 app
     .use(router)

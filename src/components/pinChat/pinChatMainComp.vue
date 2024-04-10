@@ -125,6 +125,7 @@ async function handlerCreateMessage() {
 }
 
 onMounted(() => {
+    // Обработчик нажатия Enter и Shift + Enter в поле ввода сообщений
     messageInput.value.addEventListener('keydown', function(event) {
         if (event.key === 'Enter' && event.shiftKey) {
             event.preventDefault();
@@ -148,7 +149,7 @@ onMounted(() => {
                     description: pin.description,
                 }
             }
-        })
+        });
     } catch (err) {
         console.error(err);
         throw new Error(`components/pinChat/pinChatMainComp: onMounted[parsing pin data] => ${err}`);
