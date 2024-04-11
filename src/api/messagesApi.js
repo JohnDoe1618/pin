@@ -61,9 +61,26 @@ async function createNewPostDB(newPost) {
     }
 }
 
+// Удаление Сообщения из БД Сервера
+async function deleteMessageDB(messageId) {
+    try {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                let messages = JSON.parse(localStorage.getItem('messages'));
+                messages = messages.filter((message) => message.id !== messageId);
+                localStorage.setItem('messages', JSON.stringify(messages));
+                resolve(true);
+            }, 500);
+        });
+    } catch (err) {
+        throw new Error(`api/messagesApi: deleteMessageDB  => ${err}`);
+    }
+}
+
 export {
     getAllMessagesDB,
     createNewMessageDB,
     getMessagesByPinIdDB,
     createNewPostDB,
+    deleteMessageDB,
 }

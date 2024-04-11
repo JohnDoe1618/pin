@@ -11,6 +11,16 @@
         @complete="handlerSuccessAnimation"
         ></success-note-comp>
 
+        <contextMenuComp 
+        :is-show="isShowContextMenu"
+        :position="{x: positionMenuX, y: positionMenuY}"
+        :message-id="messageIdForMenu"
+        :is-loading-delete="isLoadingDeletedMessage"
+        @delete="handlerDeleteMessage"
+        @close="isShowContextMenu = false"
+        />
+
+
         <!-- Шапка -->
         <div class="pin-chat-main__header">
             <h4 class="header-title">{{ pinData.title }}</h4>
@@ -37,10 +47,11 @@
             />
 
             <div class="message-wrapper"></div>
-            <pinChatItemComp 
+            <pinChatItemComp
             v-for="message in mainStore.messages" 
             :key="message.id" 
             :message-data="message"
+            @position="(coords) => handlerMountedContextMenu(coords)"
             />
         </div>
 
@@ -80,13 +91,18 @@
 </template>
 
 <script setup>
+// API
 import optionsMenuComp from './optionsMenuComp.vue';
 import creationPostFormComp from './creationPostFormComp.vue';
+import contextMenuComp from './contextMenuComp.vue';
+import pinChatItemComp from './pinChatItemComp.vue';
+// API
+import { createNewMessageDB, getMessagesByPinIdDB, deleteMessageDB } from '../../api/messagesApi';
+// STORE
+import useMainStore from '@/store/mainStore';
+// VUE
 import { ref, onMounted, onBeforeMount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { createNewMessageDB, getMessagesByPinIdDB } from '../../api/messagesApi';
-import useMainStore from '@/store/mainStore';
-import pinChatItemComp from './pinChatItemComp.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -100,15 +116,34 @@ const pinData = ref({
     description: null,
 });
 const isLoadingCreationMessage = ref(false);
+const isLoadingDeletedMessage = ref(false);
 const maxHeightInput = ref('30px');
 const isShowCreationPost = ref(false);
 const errorMsg = ref('');
 // DOM ELEMENTS
 const pinChatMainBody = ref(null);
 const messageInput = ref(null);
+// Context Menu
+const positionMenuX = ref(0);
+const positionMenuY = ref(0);
+const messageIdForMenu = ref(null);
+const isShowContextMenu = ref(false);
 
 
 // ====================================  METHODS  ====================================
+// Обработчик открытия контекстного меню для взаимодействия с сообщениями
+function handlerMountedContextMenu({ x, y, messageId }) {
+    try {
+        console.log(x, y);
+        positionMenuX.value = x;
+        positionMenuY.value = y;
+        messageIdForMenu.value = messageId;
+        isShowContextMenu.value = true;
+    } catch (err) {
+        throw new Error(`components/pinChat/pinChatMainComp.vue: handlerMountedContextMenu => ${err}`);
+    }
+}
+
 function autoExpand(event) {
     // Сбросить высоту перед получением новой
     if(event.target.value === '') {
@@ -131,7 +166,7 @@ function updateScroll() {
             }, 0);
         }
     } catch (err) {
-        throw new Error(`components/pinChat/pinChatMainComp: updateScroll => ${err}`);
+        throw new Error(`components/pinChat/pinChatMainComp.vue: updateScroll => ${err}`);
     }
 }
 
@@ -163,6 +198,19 @@ async function handlerCreateMessage() {
     }
 }
 
+// Обработчик Удаления сообщения
+async function handlerDeleteMessage(messageId) {
+    try {
+        isLoadingDeletedMessage.value = true;
+        await deleteMessageDB(messageId);
+    } catch (err) {
+        throw new Error(`components/pinChat/pinChatMainComp.vue: handlerDeleteMessage => ${err}`);
+    } finally {
+        isLoadingDeletedMessage.value = false;
+        isShowContextMenu.value = false;
+    }
+}
+
 // Обработчик закрытия формы для создания поста
 function handlerCloseCreationFormPost() {
     try {
@@ -177,7 +225,7 @@ function handlerSuccess() {
     try {
         mainStore.activateSuccessNote(1200);
     } catch (err) {
-        throw new Error(`components/pins/pinsMainComp.vue: handlerSuccess => ${err}`);
+        throw new Error(`components/pinChat/pinChatMainComp.vue: handlerSuccess => ${err}`);
     }
 }
 
@@ -188,7 +236,7 @@ function handlerSuccessAnimation() {
             // isShowCreationForm.value = false;
         }
     } catch (err) {
-        throw new Error(`components/pins/pinsMainComp.vue: handlerSuccessAnimation => ${err}`);
+        throw new Error(`components/pinChat/pinChatMainComp.vue: handlerSuccessAnimation => ${err}`);
     }
 }
 
@@ -215,6 +263,7 @@ onBeforeMount(() => {
 });
 
 onMounted(async() => {
+
     // Обработчик нажатия Enter и Shift + Enter в поле ввода сообщений
     messageInput.value.addEventListener('keydown', function(event) {
         if (event.key === 'Enter' && event.shiftKey) {
@@ -242,6 +291,7 @@ onMounted(async() => {
 <style scoped>
 
 .pin-chat-main {
+    position: relative;
     border: 1px solid black;
     position: relative;
     height: 92vh;

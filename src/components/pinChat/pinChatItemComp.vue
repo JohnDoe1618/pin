@@ -3,6 +3,7 @@
     :id="`message-` + props.messageData.id"
     class="pin-chat-item__container"
     >
+
         <div class="pin-chat-item">
             <!-- Если тип сообщения post то появляются все необходимые для поста UI элементы -->
             <div 
@@ -18,12 +19,26 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue';
+import { defineProps, defineEmits, onMounted } from 'vue';
+
 const props = defineProps({
     messageData: {
         type: Object,
         required: true,
     }
+});
+const emit = defineEmits({
+    position: { x: 0, y: 0 },
+});
+
+// 
+onMounted(() => {
+    const chatItem = document.getElementById(`message-${props.messageData.id}`);
+    chatItem.addEventListener('contextmenu', (event) => {
+        event.preventDefault();
+        emit('position', { x: event.pageX, y: event.pageY, messageId: props.messageData.id });
+
+    });
 });
 
 </script>
