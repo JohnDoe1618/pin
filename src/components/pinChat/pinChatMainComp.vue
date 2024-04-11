@@ -7,7 +7,10 @@
         </div>
 
         <!-- Блок отрисовки сообщений -->
-        <div class="pin-chat-main__body" ref="pinChatMainBody">
+        <div 
+        class="pin-chat-main__body" 
+        ref="pinChatMainBody"
+        >
             <!-- Уведомление "Еще нет Сообщений" -->
             <div 
             class="if-not-messages"
@@ -15,6 +18,11 @@
             >
                 <h1 class="if-not-message__title">Not Message</h1>
             </div>
+
+            <!-- Форма создания поста -->
+            <creationPostFormComp 
+            :is-show="true"
+            />
 
             <div class="message-wrapper"></div>
             <pinChatItemComp 
@@ -29,7 +37,9 @@
 
             <!-- Меню опций панели ввода -->
             <div class="actions--options">
-                <v-btn class="btn-options" icon="mdi-menu"></v-btn>
+                <optionsMenuComp 
+                @open-creation-post="isShowCreationPost = true"
+                />
             </div>
 
             <!-- Поле ввода сообщений -->
@@ -58,6 +68,8 @@
 </template>
 
 <script setup>
+import optionsMenuComp from './optionsMenuComp.vue';
+import creationPostFormComp from './creationPostFormComp.vue';
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { createNewMessageDB, getMessagesByPinIdDB } from '../../api/messagesApi';
@@ -76,6 +88,7 @@ const pinData = ref({
 });
 const isLoadingCreationMessage = ref(false);
 const maxHeightInput = ref('30px');
+const isShowCreationPost = ref(false);
 // DOM ELEMENTS
 const pinChatMainBody = ref(null);
 const messageInput = ref(null);
@@ -136,9 +149,8 @@ async function handlerCreateMessage() {
     }
 }
 
+// ====================================  LIFECYCLE HOOKS  ====================================
 onMounted(async() => {
-
-
     // Обработчик нажатия Enter и Shift + Enter в поле ввода сообщений
     messageInput.value.addEventListener('keydown', function(event) {
         if (event.key === 'Enter' && event.shiftKey) {
@@ -152,7 +164,6 @@ onMounted(async() => {
         updateScroll()
     } catch (err) {
         throw new Error(`components/pinChat/pinChatMainComp: onMounted[updateScroll] => ${err}`);
-
     }
     // Получение данных текущего пина
     try {
@@ -175,7 +186,7 @@ onMounted(async() => {
     } catch (err) {
         throw new Error(`components/pinChat/pinChatMainComp: onMounted[fetch messages] => ${err}`);
     }
-})
+});
 
 </script>
 
@@ -246,10 +257,6 @@ onMounted(async() => {
     align-items: center;
     width: 5%;
     border: 1px solid black;
-}
-.btn-options {
-    background-color: var(--chat-input-btn-bg);
-    color: var(--chat-input-btn-fg);
 }
 
 .actions--input {
