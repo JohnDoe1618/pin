@@ -21,7 +21,7 @@
 
             <!-- Форма создания поста -->
             <creationPostFormComp 
-            :is-show="true"
+            :is-show="isShowCreationPost"
             />
 
             <div class="message-wrapper"></div>
@@ -88,7 +88,7 @@ const pinData = ref({
 });
 const isLoadingCreationMessage = ref(false);
 const maxHeightInput = ref('30px');
-const isShowCreationPost = ref(false);
+const isShowCreationPost = ref(true);
 // DOM ELEMENTS
 const pinChatMainBody = ref(null);
 const messageInput = ref(null);

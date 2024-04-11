@@ -53,6 +53,13 @@ import mainComp from '@/components/main/mainComp.vue';
     --succ-fg: greenyellow;
     --err-bg: black;
     --err-fg: rgb(245, 87, 87);
+
+    /* creation post section */
+    --section-border: 1px solid gray;
+
+    /* Buttons */
+    --btn-fg: white;
+    --btn-bg: black;
 }
 
 #app {
