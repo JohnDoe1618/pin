@@ -47,6 +47,7 @@ import mainComp from '@/components/main/mainComp.vue';
     --message-bg: black;
     --message-hover: rgba(128, 128, 128, 0.1);
     --font-size: 0.8rem;
+    --post-border: 1px solid rgba(255, 255, 255, 0.393);
 
     /* Notifications */
     --succ-bg: black;
@@ -55,7 +56,7 @@ import mainComp from '@/components/main/mainComp.vue';
     --err-fg: rgb(245, 87, 87);
 
     /* creation post section */
-    --section-border: 1px solid gray;
+    --section-border: 1px solid rgba(128, 128, 128, 0.448);
 
     /* Buttons */
     --btn-fg: white;

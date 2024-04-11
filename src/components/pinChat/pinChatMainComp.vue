@@ -1,6 +1,16 @@
 <template>
     <div class="pin-chat-main">
 
+        <!-- Уведомление ошибки -->
+        <error-note-comp 
+        :error-msg="errorMsg"
+        ></error-note-comp>
+
+        <!-- Уведомление успеха -->
+        <success-note-comp
+        @complete="handlerSuccessAnimation"
+        ></success-note-comp>
+
         <!-- Шапка -->
         <div class="pin-chat-main__header">
             <h4 class="header-title">{{ pinData.title }}</h4>
@@ -8,7 +18,7 @@
 
         <!-- Блок отрисовки сообщений -->
         <div 
-        class="pin-chat-main__body" 
+        class="pin-chat-main__body"
         ref="pinChatMainBody"
         >
             <!-- Уведомление "Еще нет Сообщений" -->
@@ -22,6 +32,8 @@
             <!-- Форма создания поста -->
             <creationPostFormComp 
             :is-show="isShowCreationPost"
+            @close="handlerCloseCreationFormPost"
+            @success="handlerSuccess"
             />
 
             <div class="message-wrapper"></div>
@@ -70,13 +82,14 @@
 <script setup>
 import optionsMenuComp from './optionsMenuComp.vue';
 import creationPostFormComp from './creationPostFormComp.vue';
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, onMounted, onBeforeMount } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { createNewMessageDB, getMessagesByPinIdDB } from '../../api/messagesApi';
 import useMainStore from '@/store/mainStore';
 import pinChatItemComp from './pinChatItemComp.vue';
 
 const route = useRoute();
+const router = useRouter();
 
 // ====================================  DATA  ====================================
 const message = ref('');
@@ -88,7 +101,8 @@ const pinData = ref({
 });
 const isLoadingCreationMessage = ref(false);
 const maxHeightInput = ref('30px');
-const isShowCreationPost = ref(true);
+const isShowCreationPost = ref(false);
+const errorMsg = ref('');
 // DOM ELEMENTS
 const pinChatMainBody = ref(null);
 const messageInput = ref(null);
@@ -149,7 +163,57 @@ async function handlerCreateMessage() {
     }
 }
 
+// Обработчик закрытия формы для создания поста
+function handlerCloseCreationFormPost() {
+    try {
+        isShowCreationPost.value = false;
+    } catch (err) {
+        throw new Error(`components/pinChat/pinChatMainComp: handlerCloseCreationFormPost => ${err}`);
+    }
+}
+
+// Обработчик уведомления об успехе
+function handlerSuccess() {
+    try {
+        mainStore.activateSuccessNote(1200);
+    } catch (err) {
+        throw new Error(`components/pins/pinsMainComp.vue: handlerSuccess => ${err}`);
+    }
+}
+
+// Выполняется когда завершается анимация уведомления успеха 
+function handlerSuccessAnimation() {
+    try {
+        if(isShowCreationPost.value === true) {
+            // isShowCreationForm.value = false;
+        }
+    } catch (err) {
+        throw new Error(`components/pins/pinsMainComp.vue: handlerSuccessAnimation => ${err}`);
+    }
+}
+
 // ====================================  LIFECYCLE HOOKS  ====================================
+onBeforeMount(() => {
+    // Получение данных текущего пина
+    try {
+        mainStore.pins.forEach((pin) => {
+            if (+route.params.id === pin.id) {
+                pinData.value = {
+                    id: pin.id,
+                    title: pin.title,
+                    description: pin.description,
+                }
+            }
+        });
+        if(pinData.value.id === null) {
+            router.push({name: 'pins'});
+        }
+    } catch (err) {
+        console.error(err);
+        throw new Error(`components/pinChat/pinChatMainComp: onBeforeMount[parsing pin data] => ${err}`);
+    }
+});
+
 onMounted(async() => {
     // Обработчик нажатия Enter и Shift + Enter в поле ввода сообщений
     messageInput.value.addEventListener('keydown', function(event) {
@@ -165,21 +229,6 @@ onMounted(async() => {
     } catch (err) {
         throw new Error(`components/pinChat/pinChatMainComp: onMounted[updateScroll] => ${err}`);
     }
-    // Получение данных текущего пина
-    try {
-        mainStore.pins.forEach((pin) => {
-            if (+route.params.id === pin.id) {
-                pinData.value = {
-                    id: pin.id,
-                    title: pin.title,
-                    description: pin.description,
-                }
-            }
-        });
-    } catch (err) {
-        console.error(err);
-        throw new Error(`components/pinChat/pinChatMainComp: onMounted[parsing pin data] => ${err}`);
-    }
     // Получение сообщений текущего пина
     try {
         mainStore.messages = await getMessagesByPinIdDB(pinData.value.id);
@@ -193,7 +242,6 @@ onMounted(async() => {
 <style scoped>
 
 .pin-chat-main {
-    position: relative;
     border: 1px solid black;
     position: relative;
     height: 92vh;

@@ -4,6 +4,12 @@
     class="pin-chat-item__container"
     >
         <div class="pin-chat-item">
+            <!-- Если тип сообщения post то появляются все необходимые для поста UI элементы -->
+            <div 
+            class="pin-chat-item__header" 
+            v-if="props.messageData?.type === 'post'" >
+                <h2>{{ props.messageData?.title }}</h2>
+            </div>
             <p class="pin-chat-item__text">
                 {{ props.messageData?.textContent }}
             </p>
@@ -41,6 +47,10 @@ const props = defineProps({
     padding: 0.6rem 1rem;
     max-width: 60%;
     min-width: 20px;
+}
+.pin-chat-item__header {
+    border-bottom: var(--post-border);
+    margin-bottom: 1.4rem;
 }
 
 .pin-chat-item__text {

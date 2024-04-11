@@ -45,8 +45,25 @@ async function createNewMessageDB(newMessage) {
     }
 }
 
+// Создание нового поста 
+async function createNewPostDB(newPost) {
+    try {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                const messages = JSON.parse(localStorage.getItem('messages'));
+                messages.push(newPost);
+                localStorage.setItem('messages', JSON.stringify(messages));
+                resolve(newPost);
+            }, 500);
+        });
+    } catch (err) {
+        throw new Error(`api/messagesApi: createNewPostDB  => ${err}`);
+    }
+}
+
 export {
     getAllMessagesDB,
     createNewMessageDB,
     getMessagesByPinIdDB,
+    createNewPostDB,
 }
