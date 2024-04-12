@@ -61,6 +61,27 @@ async function createNewPostDB(newPost) {
     }
 }
 
+// Редактирование Поста в БД Сервера
+async function editPostDB(messageId, modifiedMessage) {
+    try {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                let messages = JSON.parse(localStorage.getItem('messages'));
+                messages = messages.map((message) => {
+                    if(message.id === messageId) {
+                        message = modifiedMessage;
+                    }
+                    return message;
+                });
+                localStorage.setItem('messages', JSON.stringify(messages));
+                resolve(modifiedMessage);
+            }, 500);
+        });
+    } catch (err) {
+        throw new Error(`api/messagesApi: editPostDB  => ${err}`);
+    }
+}
+
 // Удаление Сообщения из БД Сервера
 async function deleteMessageDB(messageId) {
     try {
@@ -103,6 +124,7 @@ export {
     createNewMessageDB,
     getMessagesByPinIdDB,
     createNewPostDB,
+    editPostDB,
     deleteMessageDB,
     editMessageDB,
 }

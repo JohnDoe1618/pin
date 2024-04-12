@@ -47,6 +47,14 @@
             @success="handlerSuccess"
             />
 
+            <!-- Форма редактирования поста -->
+            <editPostFormComp 
+            :is-show="isShowEditorPost"
+            :post-data="currentMessage"
+            @close="handlerCloseEditorFormPost"
+            @success="handlerSuccess"
+            />
+
             <pinChatItemComp
             v-for="messageItem in mainStore.messages" 
             :key="messageItem.id" 
@@ -112,6 +120,7 @@
 // API
 import optionsMenuComp from './optionsMenuComp.vue';
 import creationPostFormComp from './creationPostFormComp.vue';
+import editPostFormComp from './editPostFormComp.vue';
 import contextMenuComp from './contextMenuComp.vue';
 import pinChatItemComp from './pinChatItemComp.vue';
 // API
@@ -158,6 +167,7 @@ const isLoadingCreationMessage = ref(false);
 const isLoadingDeletedMessage = ref(false);
 const maxHeightInput = ref('30px');
 const isShowCreationPost = ref(false);
+const isShowEditorPost = ref(false);
 const errorMsg = ref('');
 // DOM ELEMENTS
 const pinChatMainBody = ref(null);
@@ -189,9 +199,9 @@ function handlerOpenEditMode(messageId) {
             type: foundMessage.type ?? 'default',
         }
         isShowContextMenu.value = false;
-        chatMode.value = 'edit';
         // Если нажали на обычное сообщение
         if(messageTypeForMenu.value === 'default') {
+            chatMode.value = 'edit';
             message.value = foundMessage.textContent;
             messageCopy.value = {
                 files: foundMessage?.files,
@@ -202,7 +212,13 @@ function handlerOpenEditMode(messageId) {
         } 
         // Если нажали на сообщение с типом "post"
         else if(messageTypeForMenu.value === 'post') {
-            console.log(foundMessage);
+            messageCopy.value = {
+                files: foundMessage?.files,
+                tags: foundMessage?.tags,
+                textContent: foundMessage.textContent,
+                title: foundMessage?.title,
+            };
+            isShowEditorPost.value = true;
         }
     } catch (err) {
         throw new Error(`components/pinChat/pinChatMainComp.vue: handlerOpenEditMode => ${err}`);
@@ -306,7 +322,20 @@ async function handlerEditMessage(messageId) {
         });
         // Если изменения в сообщении были, то отправляем запрос
         if(isComapre === false) {
-            currentMessage.value.textContent = message.value;
+            if(currentMessage.value.type === "default") {
+                currentMessage.value.textContent = message.value;
+            }
+            else if(currentMessage.value.type === "post") {
+                // currentMessage.value = {
+                //     id: 0,
+                //     pinId: 0,
+                //     files: [],
+                //     tags: [],
+                //     textContent: '',
+                //     title: '',
+                //     type: '',
+                // }
+            }
             const modifiedMessage = await editMessageDB(messageId, currentMessage.value);
             console.log(modifiedMessage);
             mainStore.messages.forEach((message, index) => {
@@ -321,12 +350,21 @@ async function handlerEditMessage(messageId) {
     }
 }
 
-// Обработчик закрытия формы для создания поста
+// Обработчик закрытия формы создания поста
 function handlerCloseCreationFormPost() {
     try {
         isShowCreationPost.value = false;
     } catch (err) {
         throw new Error(`components/pinChat/pinChatMainComp: handlerCloseCreationFormPost => ${err}`);
+    }
+}
+
+// Обработчик закрытия формы редактирования поста
+function handlerCloseEditorFormPost() {
+    try {
+        isShowEditorPost.value = false;
+    } catch (err) {
+        throw new Error(`components/pinChat/pinChatMainComp: handlerCloseEditorFormPost => ${err}`);
     }
 }
 
@@ -375,7 +413,7 @@ function clearGeneralData() {
         positionMenuX.value = 0;
         chatMode.value = 'default';
     } catch (err) {
-        throw new Error(`components/pinChat/pinChatMainComp.vue: clearEditData => ${err}`);
+        throw new Error(`components/pinChat/pinChatMainComp.vue: clearGeneralData => ${err}`);
     }
 }
 
@@ -411,8 +449,9 @@ onMounted(async() => {
             message.value;
         }
     });
+    // Обновляем состояние прокрутки сообщений до самого последнего сообщения
     try {
-        updateScroll()
+        updateScroll();
     } catch (err) {
         throw new Error(`components/pinChat/pinChatMainComp: onMounted[updateScroll] => ${err}`);
     }
