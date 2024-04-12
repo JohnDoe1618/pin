@@ -36,8 +36,7 @@ onMounted(() => {
     const chatItem = document.getElementById(`message-${props.messageData.id}`);
     chatItem.addEventListener('contextmenu', (event) => {
         event.preventDefault();
-        emit('position', { x: event.pageX, y: event.pageY, messageId: props.messageData.id });
-
+        emit('position', { x: event.pageX, y: event.pageY, messageId: props.messageData.id, messageType: props.messageData?.type });
     });
 });
 

@@ -33,6 +33,8 @@ import mainComp from '@/components/main/mainComp.vue';
     /* Pin Chat */
     --pin-chat-title-fg: white;
     --pin-chat-title-bg: black;
+    --edition-block-bg: black;
+    --edition-block-fg: white;
 
     /* Pin Chat input */
     --chat-input-btn-bg: black;

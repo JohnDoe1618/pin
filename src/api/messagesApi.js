@@ -77,10 +77,32 @@ async function deleteMessageDB(messageId) {
     }
 }
 
+// Редактирование Сообщения в БД Сервера
+async function editMessageDB(messageId, modifiedMessage) {
+    try {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                let messages = JSON.parse(localStorage.getItem('messages'));
+                messages = messages.map((message) => {
+                    if(message.id === messageId) {
+                        message = modifiedMessage;
+                    }
+                    return message;
+                });
+                localStorage.setItem('messages', JSON.stringify(messages));
+                resolve(modifiedMessage);
+            }, 500);
+        });
+    } catch (err) {
+        throw new Error(`api/messagesApi: editMessageDB  => ${err}`);
+    }
+}
+
 export {
     getAllMessagesDB,
     createNewMessageDB,
     getMessagesByPinIdDB,
     createNewPostDB,
     deleteMessageDB,
+    editMessageDB,
 }

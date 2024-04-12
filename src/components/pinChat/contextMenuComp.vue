@@ -8,17 +8,15 @@
             <v-list class="context-menu">
     
                 <v-btn
+                class="btn"
                 prepend-icon="mdi-pencil-outline" 
-                title="Delete message" 
                 variant="flat"
-                @click.stop="emit('delete', props.messageId)"
-                :loading="props.isLoadingDelete"
+                @click.stop="emit('edit', props.messageId)"
                 >
                     Edit message
                 </v-btn>
                 <v-btn
                 prepend-icon="mdi-delete-outline" 
-                title="Delete message" 
                 variant="flat"
                 @click.stop="emit('delete', props.messageId)"
                 :loading="props.isLoadingDelete"
@@ -47,20 +45,29 @@ const props = defineProps({
         type: [Number, String],
         required: false,
     },
+    messageType: {
+        type: String,
+        required: false,
+    },
     isLoadingDelete: {
         type: Boolean,
         required: false,
-    }
+    },
 });
 
 // =========================================  EMITS  =========================================  
 const emit = defineEmits({
     delete: null,
+    edit: null,
     close: null,
 });
 
 // =========================================  DATA  =========================================  
 const contextMenuContainer = ref(null);
+
+
+// =========================================  METHODS  =========================================  
+
 
 // =========================================  WATCH  =========================================
 // Записываем позицию появления контекстного меню относительно позиции курсора
@@ -126,5 +133,10 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+}
+.btn {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
 }
 </style>

@@ -13,13 +13,14 @@
 
         <contextMenuComp 
         :is-show="isShowContextMenu"
-        :position="{x: positionMenuX, y: positionMenuY}"
+        :position="{x: positionMenuX, y: positionMenuY }"
         :message-id="messageIdForMenu"
+        :message-type="messageTypeForMenu"
         :is-loading-delete="isLoadingDeletedMessage"
-        @delete="handlerDeleteMessage"
         @close="isShowContextMenu = false"
+        @delete="handlerDeleteMessage"
+        @edit="handlerOpenEditMode"
         />
-
 
         <!-- Шапка -->
         <div class="pin-chat-main__header">
@@ -46,47 +47,64 @@
             @success="handlerSuccess"
             />
 
-            <div class="message-wrapper"></div>
             <pinChatItemComp
-            v-for="message in mainStore.messages" 
-            :key="message.id" 
-            :message-data="message"
+            v-for="messageItem in mainStore.messages" 
+            :key="messageItem.id" 
+            :message-data="messageItem"
             @position="(coords) => handlerMountedContextMenu(coords)"
             />
         </div>
 
         <!-- Блок периферии -->
-        <form class="pin-chat-main__actions" @submit.prevent>
+        <div class="pin-chat-main__actions-container">
 
-            <!-- Меню опций панели ввода -->
-            <div class="actions--options">
-                <optionsMenuComp 
-                @open-creation-post="isShowCreationPost = true"
-                />
+            <!-- Блок обзора редактируемого сообщения -->
+            <div class="edit-preview" v-show="chatMode === 'edit'">
+                <div class="edit-preview__header">
+                    <v-icon icon="mdi-pen" size="20"></v-icon>
+                </div>
+                <div class="edit-preview__message">
+                    <h4 class="edit-preview__title">
+                        Edit message
+                    </h4>
+                    <!-- Контент редактируемого сообщения -->
+                    <p class="edit-preview__message-content">
+                        {{ messageCopy.textContent }}
+                    </p>
+                </div>
             </div>
 
-            <!-- Поле ввода сообщений -->
-            <div class="actions--input">
-                <textarea 
-                class="actions-form__message-input"
-                @input="autoExpand"
-                @keyup.shift.enter="handlerCreateMessage"
-                ref="messageInput"
-                placeholder="Enter your message"
-                v-model="message"
-                ></textarea>
-            </div>
-
-            <!-- Кнопки для управления панелью ввода -->
-            <div class="actions--btns">
-                <v-btn 
-                class="btn-send" 
-                icon="mdi-send-variant"
-                @click="handlerCreateMessage"
-                :loading="isLoadingCreationMessage"
-                ></v-btn>
-            </div>
-        </form>
+            <form class="pin-chat-main__actions" @submit.prevent>
+                <!-- Меню опций панели ввода -->
+                <div class="actions--options">
+                    <optionsMenuComp 
+                    @open-creation-post="isShowCreationPost = true"
+                    />
+                </div>
+    
+                <!-- Поле ввода сообщений -->
+                <div class="actions--input">
+                    <textarea 
+                    class="actions-form__message-input"
+                    @input="autoExpand"
+                    @keyup.shift.enter="handlerCreateMessage"
+                    ref="messageInput"
+                    placeholder="Enter your message"
+                    v-model="message"
+                    ></textarea>
+                </div>
+    
+                <!-- Кнопки для управления панелью ввода -->
+                <div class="actions--btns">
+                    <v-btn 
+                    class="btn-send" 
+                    icon="mdi-send-variant"
+                    @click="handlerCreateMessage"
+                    :loading="isLoadingCreationMessage"
+                    ></v-btn>
+                </div>
+            </form>
+        </div>
     </div>
 </template>
 
@@ -97,7 +115,12 @@ import creationPostFormComp from './creationPostFormComp.vue';
 import contextMenuComp from './contextMenuComp.vue';
 import pinChatItemComp from './pinChatItemComp.vue';
 // API
-import { createNewMessageDB, getMessagesByPinIdDB, deleteMessageDB } from '../../api/messagesApi';
+import { 
+    createNewMessageDB, 
+    getMessagesByPinIdDB, 
+    deleteMessageDB, 
+    editMessageDB 
+} from '../../api/messagesApi';
 // STORE
 import useMainStore from '@/store/mainStore';
 // VUE
@@ -106,14 +129,30 @@ import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
 const router = useRouter();
+const mainStore = useMainStore();
 
 // ====================================  DATA  ====================================
 const message = ref('');
-const mainStore = useMainStore();
+const messageCopy = ref({
+    files: [],
+    tags: [],
+    textContent: '',
+    title: '',
+});
+const chatMode = ref('default') // default | edit
 const pinData = ref({
     id: null,
     title: null,
     description: null,
+});
+const currentMessage = ref({
+    id: 0,
+    pinId: 0,
+    files: [],
+    tags: [],
+    textContent: '',
+    title: '',
+    type: '',
 });
 const isLoadingCreationMessage = ref(false);
 const isLoadingDeletedMessage = ref(false);
@@ -127,17 +166,57 @@ const messageInput = ref(null);
 const positionMenuX = ref(0);
 const positionMenuY = ref(0);
 const messageIdForMenu = ref(null);
+const messageTypeForMenu = ref('default'); // default | post
 const isShowContextMenu = ref(false);
 
 
 // ====================================  METHODS  ====================================
+// Функция выполняет действия для отображения сообщения которое необходимо отредактировать
+function handlerOpenEditMode(messageId) {
+    try {
+        // Достаем объект сообщения из массива сообщений
+        const foundMessage = mainStore.messages.find((message) => {
+            return message.id === messageId;
+        });
+        // Запоминаем сообщение с которым работаем
+        currentMessage.value = {
+            files: foundMessage?.files ?? null,
+            id: foundMessage.id ?? null,
+            pinId: foundMessage.pinId ?? null,
+            tags: foundMessage?.tags ?? null,
+            textContent: foundMessage.textContent,
+            title: foundMessage.title ?? null,
+            type: foundMessage.type ?? 'default',
+        }
+        isShowContextMenu.value = false;
+        chatMode.value = 'edit';
+        // Если нажали на обычное сообщение
+        if(messageTypeForMenu.value === 'default') {
+            message.value = foundMessage.textContent;
+            messageCopy.value = {
+                files: foundMessage?.files,
+                tags: foundMessage?.tags,
+                textContent: foundMessage.textContent,
+                title: foundMessage?.title,
+            };
+        } 
+        // Если нажали на сообщение с типом "post"
+        else if(messageTypeForMenu.value === 'post') {
+            console.log(foundMessage);
+        }
+    } catch (err) {
+        throw new Error(`components/pinChat/pinChatMainComp.vue: handlerOpenEditMode => ${err}`);
+    }
+}
+
 // Обработчик открытия контекстного меню для взаимодействия с сообщениями
-function handlerMountedContextMenu({ x, y, messageId }) {
+function handlerMountedContextMenu({ x, y, messageId, messageType }) {
     try {
         positionMenuX.value = x;
         positionMenuY.value = y;
         messageIdForMenu.value = messageId;
         isShowContextMenu.value = true;
+        messageTypeForMenu.value = messageType;
     } catch (err) {
         throw new Error(`components/pinChat/pinChatMainComp.vue: handlerMountedContextMenu => ${err}`);
     }
@@ -173,14 +252,22 @@ function updateScroll() {
 async function handlerCreateMessage() {
     try {
         isLoadingCreationMessage.value = true
+        if(chatMode.value === 'edit') {
+            return await handlerEditMessage(messageIdForMenu.value);
+        }
         // Иммитация отправки запроса
         if(message.value.trim().length) {
             const newMessage = await new Promise((resolve) => {
                 setTimeout(() => {
+                    // Создание обычного сообщения
                     const creationMessage = createNewMessageDB({ 
                         id: Date.now(), 
                         textContent: message.value.trim(), 
                         pinId: pinData.value.id,
+                        files: null,
+                        tags: null,
+                        title: null,
+                        type: 'default',
                     });
                     resolve(creationMessage);
                 }, 800);
@@ -208,6 +295,29 @@ async function handlerDeleteMessage(messageId) {
     } finally {
         isLoadingDeletedMessage.value = false;
         isShowContextMenu.value = false;
+    }
+}
+
+// Обработчик Редактирования сообщения
+async function handlerEditMessage(messageId) {
+    try {
+        const isComapre = mainStore.compareObjects(messageCopy.value, {
+            textContent: message.value
+        });
+        // Если изменения в сообщении были, то отправляем запрос
+        if(isComapre === false) {
+            currentMessage.value.textContent = message.value;
+            const modifiedMessage = await editMessageDB(messageId, currentMessage.value);
+            console.log(modifiedMessage);
+            mainStore.messages.forEach((message, index) => {
+                if(message.id === messageId) {
+                    mainStore.messages[index] = modifiedMessage;
+                }
+            });
+            clearGeneralData();
+        }
+    } catch (err) {
+        throw new Error(`components/pinChat/pinChatMainComp.vue: handlerEditMessage => ${err}`);
     }
 }
 
@@ -240,6 +350,35 @@ function handlerSuccessAnimation() {
     }
 }
 
+// Очистка второстепенных переменных
+function clearGeneralData() {
+    try {
+        currentMessage.value = {
+            id: 0,
+            pinId: 0,
+            files: [],
+            tags: [],
+            textContent: '',
+            title: '',
+            type: '',
+        }
+        messageCopy.value = {
+            files: [],
+            tags: [],
+            textContent: '',
+            title: '',
+        }
+        message.value = '';
+        messageTypeForMenu.value = 'default';
+        messageIdForMenu.value = null;
+        positionMenuY.value = 0;
+        positionMenuX.value = 0;
+        chatMode.value = 'default';
+    } catch (err) {
+        throw new Error(`components/pinChat/pinChatMainComp.vue: clearEditData => ${err}`);
+    }
+}
+
 // ====================================  LIFECYCLE HOOKS  ====================================
 onBeforeMount(() => {
     // Получение данных текущего пина
@@ -263,7 +402,6 @@ onBeforeMount(() => {
 });
 
 onMounted(async() => {
-
     // Обработчик нажатия Enter и Shift + Enter в поле ввода сообщений
     messageInput.value.addEventListener('keydown', function(event) {
         if (event.key === 'Enter' && event.shiftKey) {
@@ -323,6 +461,7 @@ onMounted(async() => {
     padding: 1rem 0;
     border: 1px solid black;
 }
+
 .if-not-messages {
     position: absolute;
     display: flex;
@@ -336,18 +475,31 @@ onMounted(async() => {
     font-family: monospace;
     font-weight: 900;
 }
-.message-wrapper {
-    width: 100%;
-    height: max-content;
+.pin-chat-main__actions-container {
+    position: relative;
+    width: 95%;
+    display: flex;
+    flex-direction: column;
 }
-
 .pin-chat-main__actions {
     position: relative;
     display: flex;
-    width: 95%;
+    width: 100%;
     border: 1px solid black;
 }
-
+.edit-preview {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background-color: var(--edition-block-bg);
+    color: var(--edition-block-fg);
+    bottom: 0;
+    padding: 0.3rem 0;
+}
+.edit-preview__header {
+    margin: 0 0.4rem;
+}
 .actions--options {
     display: flex;
     flex-direction: column;
@@ -380,6 +532,7 @@ onMounted(async() => {
     align-items: center;
     width: 5%;
     border: 1px solid black;
+    padding: 0.1rem 0;
 }
 .btn-send {
     background-color: var(--chat-input-btn-bg);
