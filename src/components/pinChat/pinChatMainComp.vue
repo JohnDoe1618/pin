@@ -134,7 +134,6 @@ const isShowContextMenu = ref(false);
 // Обработчик открытия контекстного меню для взаимодействия с сообщениями
 function handlerMountedContextMenu({ x, y, messageId }) {
     try {
-        console.log(x, y);
         positionMenuX.value = x;
         positionMenuY.value = y;
         messageIdForMenu.value = messageId;
@@ -203,6 +202,7 @@ async function handlerDeleteMessage(messageId) {
     try {
         isLoadingDeletedMessage.value = true;
         await deleteMessageDB(messageId);
+        mainStore.messages = mainStore.messages.filter((message) => message.id !== messageId);
     } catch (err) {
         throw new Error(`components/pinChat/pinChatMainComp.vue: handlerDeleteMessage => ${err}`);
     } finally {
