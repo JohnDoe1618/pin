@@ -21,8 +21,13 @@ async function getAllPinsDB() {
 // Создание нового пина в БД Сервера
 async function createNewPinDB(newPin) {
     try {
-        const pins = JSON.parse(localStorage.getItem('pins'));
-        pins.push(newPin);
+        let pins = JSON.parse(localStorage.getItem('pins'));
+        if(pins && Array.isArray(pins)) {
+            pins.push(newPin);
+        }
+        else {
+            pins = [newPin];
+        }
         localStorage.setItem('pins', JSON.stringify(pins));
         return newPin;
     } catch (err) {

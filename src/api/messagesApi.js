@@ -62,19 +62,22 @@ async function createNewPostDB(newPost) {
 }
 
 // Редактирование Поста в БД Сервера
-async function editPostDB(messageId, modifiedMessage) {
+async function editPostDB(messageId, changedFields) {
     try {
         return new Promise((resolve) => {
             setTimeout(() => {
                 let messages = JSON.parse(localStorage.getItem('messages'));
                 messages = messages.map((message) => {
                     if(message.id === messageId) {
-                        message = modifiedMessage;
+                        message = {
+                            ...message,
+                            ...changedFields,
+                        };
+                        resolve(message);
                     }
                     return message;
                 });
                 localStorage.setItem('messages', JSON.stringify(messages));
-                resolve(modifiedMessage);
             }, 500);
         });
     } catch (err) {

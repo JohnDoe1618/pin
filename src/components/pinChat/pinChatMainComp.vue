@@ -337,7 +337,6 @@ async function handlerEditMessage(messageId) {
                 // }
             }
             const modifiedMessage = await editMessageDB(messageId, currentMessage.value);
-            console.log(modifiedMessage);
             mainStore.messages.forEach((message, index) => {
                 if(message.id === messageId) {
                     mainStore.messages[index] = modifiedMessage;

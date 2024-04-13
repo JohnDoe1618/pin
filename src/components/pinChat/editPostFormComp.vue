@@ -131,9 +131,7 @@
 import useMainStore from '@/store/mainStore';
 import { editPostDB } from '../../api/messagesApi';
 import { ref, defineProps, defineEmits, watch, nextTick } from 'vue';
-import { useRoute } from 'vue-router';
 
-const route = useRoute();
 const mainStore = useMainStore();
 
 // =====================================  EMITS  ==================================
@@ -241,6 +239,28 @@ function handlerFilesBunlde(filesValue) {
     }
 }
 
+// Функция собирает объект тех полей поста которые были изменены
+function bundleFormData(isCompareFiles, isCompareTags) {
+    try {
+        const readyForm = {};
+        if(isCompareFiles === false) {
+            readyForm.files = [...files.value];
+        }
+        if(isCompareTags === false) {
+            readyForm.tags = [...tags.value];
+        }
+        if(content.value !== postDataCopy.value.textContent) {
+            readyForm.textContent = content.value;
+        }
+        if(title.value !== postDataCopy.value.title) {
+            readyForm.title = title.value;
+        }
+        return readyForm;
+    } catch (err) {
+        throw new Error(`components/pinChat/editPostFormComp: bundleFormData  => ${err}`);
+    }
+}
+
 // Подтверждение формы для редактирования поста
 async function confirmToEditPost() {
     try {
@@ -250,24 +270,21 @@ async function confirmToEditPost() {
             textContent: content.value,
             title: title.value,
         });
-        console.log(postDataCopy.value.tags, tags.value, isCompare);
-        // const pinIdParam = +route.params.id;
-        // if(title.value && content.value && pinIdParam) {
-        //     console.log('hell');
-        //     const newPost = { 
-        //         id: Date.now(), 
-        //         type: 'post', 
-        //         pinId: pinIdParam, 
-        //         title: title.value,
-        //         textContent: content.value,
-        //         tags: tags.value,
-        //         files: [],
-        //     }
-        //     const creationPost = await editPostDB(props.postData.id, newPost);
-        //     mainStore.messages.push(creationPost);
-        //     emit('close');
-        //     emit('success');
-        // }
+        const isCompareTags = JSON.stringify(tags.value) === JSON.stringify(postDataCopy.value.tags);
+        const isCompareFiles = JSON.stringify(files.value) === JSON.stringify(postDataCopy.value.files);
+        // Если что либо изменилось относительно исходых данных поста, то выполняется редактирование
+        if(isCompare === false || isCompareTags === false || isCompareFiles === false) {
+            const changedFields =  bundleFormData(isCompareFiles, isCompareTags);
+            const editionPost = await editPostDB(props.postData.id, changedFields);
+            editionPost
+            mainStore.messages.forEach((element, index) => {
+                if(element.id === editionPost.id) {
+                    mainStore.messages[index] = editionPost;
+                }
+            });
+            emit('close');
+            emit('success');
+        }
     } catch (err) {
         throw new Error(`components/pinChat/editPostFormComp: confirmToCreatePost  => ${err}`);
     } finally {
@@ -294,8 +311,8 @@ watch(() => [props.isShow, props.postData], async ([isShow, postData]) => {
     // Ловим изменения в данных поста
     try {
         if(postData) {
-            tags.value = postData.tags;
-            files.value = postData.files;
+            tags.value = [...postData.tags];
+            files.value = [...postData.files];
             title.value = postData.title;
             content.value = postData.textContent;
             createCopyForm(postData);
