@@ -33,6 +33,8 @@ import mainComp from '@/components/main/mainComp.vue';
     /* Pin Chat */
     --pin-chat-title-fg: white;
     --pin-chat-title-bg: black;
+    --edition-block-bg: black;
+    --edition-block-fg: white;
 
     /* Pin Chat input */
     --chat-input-btn-bg: black;
@@ -47,12 +49,20 @@ import mainComp from '@/components/main/mainComp.vue';
     --message-bg: black;
     --message-hover: rgba(128, 128, 128, 0.1);
     --font-size: 0.8rem;
+    --post-border: 1px solid rgba(255, 255, 255, 0.393);
 
     /* Notifications */
     --succ-bg: black;
     --succ-fg: greenyellow;
     --err-bg: black;
     --err-fg: rgb(245, 87, 87);
+
+    /* creation post section */
+    --section-border: 1px solid rgba(128, 128, 128, 0.448);
+
+    /* Buttons */
+    --btn-fg: white;
+    --btn-bg: black;
 }
 
 #app {

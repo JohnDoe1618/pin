@@ -30,5 +30,6 @@ const router = useRouter();
 <style scoped>
 .nav-draw {
     border-right: 2px solid rgb(201, 87, 87);
+    z-index: 99999 !important;
 }
 </style>

@@ -45,8 +45,89 @@ async function createNewMessageDB(newMessage) {
     }
 }
 
+// Создание нового поста 
+async function createNewPostDB(newPost) {
+    try {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                const messages = JSON.parse(localStorage.getItem('messages'));
+                messages.push(newPost);
+                localStorage.setItem('messages', JSON.stringify(messages));
+                resolve(newPost);
+            }, 500);
+        });
+    } catch (err) {
+        throw new Error(`api/messagesApi: createNewPostDB  => ${err}`);
+    }
+}
+
+// Редактирование Поста в БД Сервера
+async function editPostDB(messageId, changedFields) {
+    try {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                let messages = JSON.parse(localStorage.getItem('messages'));
+                messages = messages.map((message) => {
+                    if(message.id === messageId) {
+                        message = {
+                            ...message,
+                            ...changedFields,
+                        };
+                        resolve(message);
+                    }
+                    return message;
+                });
+                localStorage.setItem('messages', JSON.stringify(messages));
+            }, 500);
+        });
+    } catch (err) {
+        throw new Error(`api/messagesApi: editPostDB  => ${err}`);
+    }
+}
+
+// Удаление Сообщения из БД Сервера
+async function deleteMessageDB(messageId) {
+    try {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                let messages = JSON.parse(localStorage.getItem('messages'));
+                messages = messages.filter((message) => message.id !== messageId);
+                localStorage.setItem('messages', JSON.stringify(messages));
+                resolve(true);
+            }, 500);
+        });
+    } catch (err) {
+        throw new Error(`api/messagesApi: deleteMessageDB  => ${err}`);
+    }
+}
+
+// Редактирование Сообщения в БД Сервера
+async function editMessageDB(messageId, modifiedMessage) {
+    try {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                let messages = JSON.parse(localStorage.getItem('messages'));
+                messages = messages.map((message) => {
+                    if(message.id === messageId) {
+                        message = modifiedMessage;
+                    }
+                    return message;
+                });
+                localStorage.setItem('messages', JSON.stringify(messages));
+                resolve(modifiedMessage);
+            }, 500);
+        });
+    } catch (err) {
+        throw new Error(`api/messagesApi: editMessageDB  => ${err}`);
+    }
+}
+
 export {
     getAllMessagesDB,
     createNewMessageDB,
     getMessagesByPinIdDB,
+    createNewPostDB,
+    editPostDB,
+    deleteMessageDB,
+    editMessageDB,
 }

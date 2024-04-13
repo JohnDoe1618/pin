@@ -21,14 +21,14 @@ const emit = defineEmits(['complete']);
 watch(() => mainStore.isShowSuccessNote, (newValue) => {
     try {
         if (newValue === true) {
-            gsap.to('.success-note', { duration: 0.5, right: '20px', visibility: 'visible' });
+            gsap.to('.success-note', { duration: 0.5, right: '20px' });
         }
         else if (newValue === false) {
-            gsap.to('.success-note', { duration: 0.5, right: '-40rem', visibility: 'visible' })
+            gsap.to('.success-note', { duration: 0.5, right: '-40rem' })
             .then(() => {
                 // Объявляем, что анимация уведомления завершена
                 emit('complete');
-            })
+            });
         }
     } catch (err) {
         throw new Error(`components/notifications/successNoteComp: watch => ${err}`);
@@ -41,16 +41,15 @@ watch(() => mainStore.isShowSuccessNote, (newValue) => {
 .success-note {
     position: fixed;
     right: -40rem;
-    top: 10px;
+    top: 80px;
     background-color: var(--succ-bg);
     color: white;
-    z-index: 9999999;
+    z-index: 9999999 !important;
     min-width: 50px;
     width: max-content;
     max-width: 400px;
     padding: 0.5rem 1rem;
     border-left: 5px solid var(--succ-fg);
-    visibility: hidden;
 }
 
 .note-message {
