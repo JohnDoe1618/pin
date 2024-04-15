@@ -280,8 +280,8 @@ async function handlerCreateMessage() {
                         id: Date.now(), 
                         textContent: message.value.trim(), 
                         pinId: pinData.value.id,
-                        files: null,
-                        tags: null,
+                        files: [],
+                        tags: [],
                         title: null,
                         type: 'default',
                     });
@@ -439,8 +439,18 @@ onBeforeMount(() => {
 });
 
 onMounted(async() => {
+    document.addEventListener('keydown', (event) => {
+        if(chatMode.value === 'edit' && event.key === 'Escape') {
+            clearGeneralData();
+            return;
+        }
+        else if(chatMode.value === 'default' && event.key === 'Escape') {
+            router.push({name: 'pins'});
+        }
+    });
     // Обработчик нажатия Enter и Shift + Enter в поле ввода сообщений
     messageInput.value.addEventListener('keydown', function(event) {
+
         if (event.key === 'Enter' && event.shiftKey) {
             event.preventDefault();
         }
@@ -461,7 +471,6 @@ onMounted(async() => {
         throw new Error(`components/pinChat/pinChatMainComp: onMounted[fetch messages] => ${err}`);
     }
 });
-
 </script>
 
 <style scoped>
@@ -541,7 +550,7 @@ onMounted(async() => {
 .actions--options {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
+    justify-content: center;
     align-items: center;
     width: 5%;
     border: 1px solid black;
